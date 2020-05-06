@@ -22,14 +22,30 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
+
     db.create_all()
 
 
+def db_drop_and_create():
+    db.drop_all()
+    db.create_all()
+    insert_seed_records()
+
+
+def insert_seed_records():
+    actor1 = Actor(name="Bob", age=25, gender="Male")
+    actor1.insert()
+
+
 class Movie(db.Model):
-    __tablename__ = "Movie"
+    __tablename__ = "movies"
     id = Column(Integer, primary_key=True)
     title = Column(String)
     release_date = Column(db.DateTime, nullable=False)
+
+    def __init__(self, title, release_date):
+        self.title = title
+        self.release_date = release_date
 
     def insert(self):
         db.session.add(self)
@@ -51,11 +67,16 @@ class Movie(db.Model):
 
 
 class Actor(db.Model):
-    __tablename__ = "Actor"
+    __tablename__ = "actors"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     age = Column(Integer, nullable=False)
     gender = Column(String, nullable=False)
+
+    def __init__(self, name, age, gender):
+        self.name = name
+        self.age = age
+        self.gender = gender
 
     def insert(self):
         db.session.add(self)
