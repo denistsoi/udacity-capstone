@@ -34,6 +34,9 @@ class AgencyTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
 
+    # --
+    # get movies
+    # --
     def test_get_movies(self):
         response = self.client().get("/movies")
         data = json.loads(response.data)
@@ -42,42 +45,9 @@ class AgencyTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertEqual(len(data["movies"]), 0)
 
-    def test_get_actors(self):
-        response = self.client().get("/actors")
-        data = json.loads(response.data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["success"], True)
-        self.assertEqual(len(data["actors"]), 1)
-
-    # create actor
-    def test_create_actor(self):
-        new_actor = {
-            "name": "Steve",
-            "age": 20,
-            "gender": "Male"
-        }
-        response = self.client().post("/actors", json=new_actor,
-                                      headers=casting_director_auth_header)
-
-        data = json.loads(response.data)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(data["success"])
-
-    def test_create_actor_not_authorized(self):
-        new_actor = {
-            "name": "Steve",
-            "age": 20,
-            "gender": "Male"
-        }
-        response = self.client().post("/actors", json=new_actor)
-        data = json.loads(response.data)
-
-        self.assertEqual(response.status_code, 401)
-        self.assertEqual(data["message"], "Authorization header is expected.")
-        self.assertFalse(data["success"])
-
-    # movie
+    # --
+    # create movies
+    # --
     def test_create_movie(self):
         new_movie = {
             "title": "Titanic",
@@ -104,6 +74,51 @@ class AgencyTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertFalse(data["success"])
 
+    # --
+    # get actors
+    # --
+
+    def test_get_actors(self):
+        response = self.client().get("/actors")
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(len(data["actors"]), 1)
+
+    # --
+    # create actor
+    # --
+    def test_create_actor(self):
+        new_actor = {
+            "name": "Steve",
+            "age": 20,
+            "gender": "Male"
+        }
+        response = self.client().post("/actors", json=new_actor,
+                                      headers=casting_director_auth_header)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data["success"])
+
+    def test_create_actor_not_authorized(self):
+        new_actor = {
+            "name": "Steve",
+            "age": 20,
+            "gender": "Male"
+        }
+        response = self.client().post("/actors", json=new_actor)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data["message"], "Authorization header is expected.")
+        self.assertFalse(data["success"])
+
+    # --
+    # update actor
+    # --
+
     def test_patch_actor(self):
         updated_actor = {"name": "Bill"}
         response = self.client().patch("/actors/1", headers=casting_director_auth_header)
@@ -120,6 +135,10 @@ class AgencyTestCase(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 401)
         self.assertFalse(data["success"])
+
+    # --
+    # delete actor
+    # --
 
     def test_delete_actor(self):
         response = self.client().delete("/actors/2", headers=casting_director_auth_header)
