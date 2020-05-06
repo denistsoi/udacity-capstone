@@ -25,25 +25,53 @@ def setup_db(app, database_path=database_path):
     db.create_all()
 
 
-'''
-Person
-Have title and release year
-'''
-
-
-class Person(db.Model):
-    __tablename__ = 'People'
-
+class Movie(db.Model):
+    __tablename__ = "Movie"
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    catchphrase = Column(String)
+    title = Column(String)
+    release_date = Column(db.DateTime, nullable=False)
 
-    def __init__(self, name, catchphrase=""):
-        self.name = name
-        self.catchphrase = catchphrase
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
     def format(self):
         return {
-            'id': self.id,
-            'name': self.name,
-            'catchphrase': self.catchphrase}
+            "id": self.id,
+            "title": self.title,
+            "release_date": self.release_date
+        }
+
+
+class Actor(db.Model):
+    __tablename__ = "Actor"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    age = Column(Integer, nullable=False)
+    gender = Column(String, nullable=False)
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def format(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "age": self.age,
+            "gender": self.gender
+        }
