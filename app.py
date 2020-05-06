@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 from models import setup_db, Actor, Movie
+from auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
@@ -22,6 +23,8 @@ def create_app(test_config=None):
                              'GET,PATCH,POST,DELETE,OPTIONS')
         return response
 
+    # ---
+    # movies
     @app.route("/movies", methods=["GET"])
     def get_movies():
         movies = Movie.query.all()
@@ -33,6 +36,27 @@ def create_app(test_config=None):
             "movies": movies
         })
 
+    @app.route("/movies", methods=["POST"])
+    @requires_auth("post:movies")
+    def create_movie(payload):
+        body = request.get_json()
+
+        if "title" and "release_date" not in body:
+            abort(422)
+
+        title = body["title"]
+        release_date = body["release_date"]
+
+        movie = Movie(title=title, release_date=release_date)
+        movie.insert()
+
+        return jsonify({
+            "success": True,
+            "movies": [movie.format()]
+        })
+
+    # ---
+    # actors
     @app.route("/actors", methods=["GET"])
     def get_actors():
         actors = Actor.query.all()
@@ -43,6 +67,70 @@ def create_app(test_config=None):
             "success": True,
             "actors": [actor.format() for actor in actors]
         })
+
+    @app.route("/actors", methods=["POST"])
+    @requires_auth("post:actors")
+    def create_actor(payload):
+        body = request.get_json()
+
+        if "name" and "age" and "gender" not in body:
+            abort(422)
+
+        name = body["name"]
+        age = body["age"]
+        gender = body["gender"]
+
+        actor = Actor(name=name, age=age, gender=gender)
+        actor.insert()
+
+        return jsonify({
+            "success": True,
+            "actors": [actor.format()]
+        })
+
+    @app.route("/actors/<int:actor_id>", methods=["PATCH"])
+    @requires_auth("patch:actor")
+    def update_actor(payload, actor_id):
+        body = request.get_json()
+
+        try:
+            actor = Actor.query.get(actor_id)
+
+            if actor is None or body is None:
+                abort(404)
+
+            else:
+                if "name" in body:
+                    actor.name = body["name"]
+                if "age" in body:
+                    actor.age = body["age"]
+                if "gender" in body:
+                    actor.gender = body["gender"]
+
+                actor.update()
+                updated_actor = Actor.query.get(actor_id)
+                return jsonify({
+                    "success": True,
+                    "actors": [update_actor.format()]
+                })
+
+        except Exception as error:
+            abort(422)
+
+    @app.route("/actors/<int:actor_id>", methods=["DELETE"])
+    @requires_auth("delete:actor")
+    def delete_actor(payload, actor_id):
+        try:
+            actor = Actor.query.get(actor_id)
+            if actor is None:
+                abort(404)
+            actor.delete()
+            return jsonify({
+                "success": True,
+                "delete": actor_id
+            })
+        except Exception as error:
+            abort(422)
 
     # error handlers
     @app.errorhandler(422)
@@ -76,6 +164,14 @@ def create_app(test_config=None):
             "error": 400,
             "message": "Bad Request"
         }), 400
+
+    @app.errorhandler(AuthError)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": error.status_code,
+            "message": error.error["description"]
+        }), error.status_code
 
     return app
 

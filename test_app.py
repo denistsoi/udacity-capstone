@@ -6,6 +6,12 @@ from flask_sqlalchemy import SQLAlchemy
 from app import create_app
 from models import setup_db, Actor, Movie, db_drop_and_create, insert_seed_records
 
+from datetime import date
+
+casting_assistant_auth_header = ""
+casting_director_auth_header = ""
+executive_producer_auth_header = ""
+
 
 class AgencyTestCase(unittest.TestCase):
     """Agency test case"""
@@ -44,8 +50,99 @@ class AgencyTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertEqual(len(data["actors"]), 1)
 
+    # create actor
+    def test_create_actor(self):
+        new_actor = {
+            "name": "Steve",
+            "age": 20,
+            "gender": "Male"
+        }
+        response = self.client().post("/actors", json=new_actor,
+                                      headers=casting_director_auth_header)
 
-# Make the tests conveniently executable.
-# From app directory, run 'python test_app.py' to start tests
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data["success"])
+
+    def test_create_actor_not_authorized(self):
+        new_actor = {
+            "name": "Steve",
+            "age": 20,
+            "gender": "Male"
+        }
+        response = self.client().post("/actors", json=new_actor)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(data["message"], "Authorization header is expected.")
+        self.assertFalse(data["success"])
+
+    # movie
+    def test_create_movie(self):
+        new_movie = {
+            "title": "Titanic",
+            "release_date": date.today()
+        }
+
+        response = self.client().post("/movies", json=new_movie,
+                                      headers=executive_producer_auth_header)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data["success"])
+
+    def test_create_movie_not_authorized(self):
+        new_movie = {
+            "title": "Titanic",
+            "release_date": date.today()
+        }
+
+        response = self.client().post("/movies", json=new_movie,
+                                      headers=casting_assistant_auth_header)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertFalse(data["success"])
+
+    def test_patch_actor(self):
+        updated_actor = {"name": "Bill"}
+        response = self.client().patch("/actors/1", headers=casting_director_auth_header)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data["success"])
+
+    def test_patch_actor_unauthorized(self):
+        updated_actor = {"name": "Bill"}
+        response = self.client().patch(
+            "/actors/1", json={updated_actor}, headers=casting_assistant_auth_header)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 401)
+        self.assertFalse(data["success"])
+
+    def test_delete_actor(self):
+        response = self.client().delete("/actors/2", headers=casting_director_auth_header)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(data["success"])
+
+    def test_delete_actor_unauthorized(self):
+        response = self.client().delete("/actors/1", headers=casting_assistant_auth_header)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 401)
+        self.assertFalse(data["success"])
+
+    def test_delete_actor_not_found(self):
+        response = self.client().delete("/actors/5000", headers=casting_director_auth_header)
+
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+
+
+        # Make the tests conveniently executable.
+        # From app directory, run 'python test_app.py' to start tests
 if __name__ == "__main__":
     unittest.main()
