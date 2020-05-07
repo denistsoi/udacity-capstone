@@ -2,6 +2,7 @@ import os
 from sqlalchemy import Column, String, create_engine, Integer
 from flask_sqlalchemy import SQLAlchemy
 import json
+from datetime import date
 
 database_path = os.environ.get('DATABASE_URL')
 
@@ -35,6 +36,8 @@ def db_drop_and_create():
 def insert_seed_records():
     actor1 = Actor(name="Bob", age=25, gender="Male")
     actor1.insert()
+
+    movie1 = Movie(title="Transformers", release_date=date.today())
 
 
 class Movie(db.Model):
@@ -91,7 +94,6 @@ class Actor(db.Model):
 
     def format(self):
         return {
-            "id": self.id,
             "name": self.name,
             "age": self.age,
             "gender": self.gender

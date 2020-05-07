@@ -58,19 +58,11 @@ One test for success behavior of each endpoint
 One test for error behavior of each endpoint
 At least two tests of RBAC for each role
 
-<!-- 
-## motivation
+<!-- https://dev-98w9-5eh.auth0.com/authorize?audience=agency&response_type=token&client_id=eG5AKHAYrvf1jToGgKbBwUdmIdaVDWbd&redirect_uri=http://localhost:5000 -->
 
-i would like: 
-
-- customers can login (or register as guest) to book cooks.
-- customers can view cooks availability.
-- customers can not view cooks bookings.
-
-- cooks can view their bookings (and for what dishes/menus).
-- cooks can set their availability.
--  -->
-
+casting_assistant@example.com #m5V@ccgFMO7
+casting_director@example.com 7a03jR%F6R1d
+executive_producer@example.com 1CU1OJppfe0$
 
 
 

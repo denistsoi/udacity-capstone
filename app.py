@@ -25,8 +25,11 @@ def create_app(test_config=None):
 
     # ---
     # movies
+    # ---
+
     @app.route("/movies", methods=["GET"])
-    def get_movies():
+    @requires_auth("get:movies")
+    def get_movies(payload):
         movies = Movie.query.all()
         if movies is None:
             abort(404)
@@ -55,10 +58,61 @@ def create_app(test_config=None):
             "movies": [movie.format()]
         })
 
+    @app.route("/movies/<int:movie_id>", methods=["PATCH"])
+    @requires_auth("patch:movies")
+    def update_movies(payload, movie_id):
+        body = request.get_json()
+
+        try:
+            movie = Movie.query.get(movie_id)
+
+            if movie is None or body is None:
+                abort(404)
+
+            else:
+                if "title" in body:
+                    actor.title = body["title"]
+                if "release_date" in body:
+                    actor.release_date = body["release_date"]
+
+                movie.update()
+                updated_movie = Movie.query.get(movie_id)
+                return jsonify({
+                    "success": True,
+                    "actors": [updated_movie.format()]
+                })
+
+        except Exception as error:
+            if error.code == 404:
+                abort(404)
+
+            abort(422)
+
+    @app.route("/movies/<int:movie_id>", methods=["DELETE"])
+    @requires_auth("delete:movies")
+    def delete_movie(payload, movie_id):
+        try:
+            movie = Movie.query.get(movie_id)
+            if movie is None:
+                abort(404)
+
+            return jsonify({
+                "success": True,
+                "delete": movie_id
+            })
+        except Exception as error:
+            if (error.code == 404):
+                abort(404)
+
+            abort(422)
+
     # ---
     # actors
+    # ---
+
     @app.route("/actors", methods=["GET"])
-    def get_actors():
+    @requires_auth("get:actors")
+    def get_actors(payload):
         actors = Actor.query.all()
         if actors is None:
             abort(404)
@@ -89,7 +143,7 @@ def create_app(test_config=None):
         })
 
     @app.route("/actors/<int:actor_id>", methods=["PATCH"])
-    @requires_auth("patch:actor")
+    @requires_auth("patch:actors")
     def update_actor(payload, actor_id):
         body = request.get_json()
 
@@ -111,25 +165,28 @@ def create_app(test_config=None):
                 updated_actor = Actor.query.get(actor_id)
                 return jsonify({
                     "success": True,
-                    "actors": [update_actor.format()]
+                    "actors": [updated_actor.format()]
                 })
 
         except Exception as error:
             abort(422)
 
     @app.route("/actors/<int:actor_id>", methods=["DELETE"])
-    @requires_auth("delete:actor")
+    @requires_auth("delete:actors")
     def delete_actor(payload, actor_id):
         try:
             actor = Actor.query.get(actor_id)
             if actor is None:
                 abort(404)
-            actor.delete()
+
             return jsonify({
                 "success": True,
                 "delete": actor_id
             })
         except Exception as error:
+            if (error.code == 404):
+                abort(404)
+
             abort(422)
 
     # error handlers
