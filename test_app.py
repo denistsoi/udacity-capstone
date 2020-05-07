@@ -51,7 +51,7 @@ class AgencyTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(data["success"])
-        self.assertEqual(len(data["movies"]), 0)
+        self.assertEqual(len(data["movies"]), 1)
 
     def test_get_movies_not_authorized(self):
         response = self.client().get("/movies")

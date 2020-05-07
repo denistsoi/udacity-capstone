@@ -38,6 +38,7 @@ def insert_seed_records():
     actor1.insert()
 
     movie1 = Movie(title="Transformers", release_date=date.today())
+    movie1.insert()
 
 
 class Movie(db.Model):

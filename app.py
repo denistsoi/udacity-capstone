@@ -36,7 +36,7 @@ def create_app(test_config=None):
 
         return jsonify({
             "success": True,
-            "movies": movies
+            "movies": [movie.format() for movie in movies]
         })
 
     @app.route("/movies", methods=["POST"])
@@ -71,15 +71,16 @@ def create_app(test_config=None):
 
             else:
                 if "title" in body:
-                    actor.title = body["title"]
+                    movie.title = body["title"]
                 if "release_date" in body:
-                    actor.release_date = body["release_date"]
+                    movie.release_date = body["release_date"]
 
                 movie.update()
+
                 updated_movie = Movie.query.get(movie_id)
                 return jsonify({
                     "success": True,
-                    "actors": [updated_movie.format()]
+                    "movies": [updated_movie.format()]
                 })
 
         except Exception as error:
@@ -93,6 +94,7 @@ def create_app(test_config=None):
     def delete_movie(payload, movie_id):
         try:
             movie = Movie.query.get(movie_id)
+
             if movie is None:
                 abort(404)
 
