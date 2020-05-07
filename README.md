@@ -5,6 +5,21 @@
 Udacity Fullstack capstone project
 
 
+### Motivation
+
+This aims to consolidate the knowledge gained from the nanodegree.  
+
+The Casting Agency models a company that is responsible for creating movies and managing and assigning actors to those movies. You are an Executive Producer within the company and are creating a system to simplify and streamline your process.
+  
+
+Aims:
+1. Create data models representing `Movies`, `Actors` in `models.py`.  
+2. use `auth.py` to verify permissions of the user role.  
+3. perform database migrations.  
+4. API flask server for `CRUD` in `app.py`  
+5. Automated tests in `test_app.py`  
+6. deploy application to heroku.  
+
 ### Getting Started
 
 
@@ -12,6 +27,8 @@ Udacity Fullstack capstone project
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
+
+source ./setup.sh
 
 python manage.py db init
 python manage.py db migrate
@@ -48,17 +65,44 @@ casting_director@example.com
 7a03jR%F6R1d
   
 executive_producer@example.com 
-  1CU1OJppfe0$
+1CU1OJppfe0$
 
-tokens can be found in `test_app.py` for validating tests
+tokens can be found in `setup.sh`
 
+
+## Roles
+
+1. Casting assistant:  
+- to view actors `GET /actors (get:actors)`
+- to view movies `GET /movies (get:movies)`
+
+Casting Director:  
+- to view actors `GET /actors (get:actors)`
+- to view movies `GET /movies (get:movies)`
+- update actors `PATCH /actors (update:actors)`
+- update movies `PATCH /movies (update:movies)`
+- add actors `POST /actors (post:actors)`
+- remove actors `DELETE /actors (delete:actors)`
+
+Executive Producer:  
+- to view actors `GET /actors (get:actors)`
+- to view movies `GET /movies (get:movies)`
+- update actors `PATCH /actors (update:actors)`
+- update movies `PATCH /movies (update:movies)`
+- add actors `POST /actors (post:actors)`
+- remove actors `DELETE /actors (delete:actors)`
+- add movies `POST /movies (post:movies)`
+- remove movies `DELETE /movies (delete:movies)`
 
 ## endpoints
 
 ---
 
+```
 GET /
+```
 - description: simple health check
+- request arguments: `None`
 - returns a status health check of the app
 
 --- 
@@ -68,39 +112,83 @@ Resource Movies:
 ```
 GET /movies  
 ```
-(requires authorization header of `get:movies`)
+
 - description: list of movies
-- returns a list of movies
+- required-permission: `get:movies`
+- request arguments: None
+- returns: list of movies
+```
+{
+    "success": True,
+    "movies": [{ 
+      id: 1,
+      title: "Titanic", 
+      release_date: "Thu, 07 May 2020 00:00:00 GMT"
+    }]
+}
+```
+
+---
 
 ```
 POST /movies  
 ```
-(requires authorization header of `post:movies`)
-- description: list of movies
-- params: 
-  - title: string
-  - release_date: date
+- description: creates movies
+- required-permission: `post:movies`
+- request arguments: 
+  - title (required): `string`
+  - release_date (required): `string`
 
-- returns status of created movie
+- returns: status and data of newly created movie
+```
+{
+    "success": True,
+    "movies": [{ 
+      id: 2,
+      title: "Cats", 
+      release_date: "Sun, 03 May 2020 00:00:00 GMT"
+    }]
+}
+```
+
+---
 
 ```
 PATCH /movies/<id>
 ```
-(requires authorization header of `patch:movies`)
 - description: updates movie
-- params: 
-  - title: string
-  - release_date: date
+- required-permission: `patch:movies`
+- request arguments: 
+  - title (optional): `string`
+  - release_date (optional): `date`
 
 - returns status of updated movie
+```
+{
+    "success": True,
+    "movies": [{ 
+      id: 2,
+      title: "Bob", 
+      release_date: "Sun, 03 May 2020 00:00:00 GMT"
+    }]
+}
+```
 
+---
 
 ```
-DELETE /movies/</id>
+DELETE /movies/<id>
 ```
-(requires authorization header of `delete:movies`)
 - description: deletes movie
+- required-permission: `delete:movies`
+- request arguments: None
 - return status of deleted movie
+```
+{
+    "success": True,
+    "delete": 2
+}
+```
 
 ---
 
@@ -109,41 +197,92 @@ Resource Actors:
 ```
 GET /actors  
 ```
-(requires authorization header of `get:actors`)
 - description: list of actors
+- required-permission: `get:actors`
+- request arguments: None
 - returns a list of actors
+
+```
+{
+    "success": True,
+    "actors": [{ 
+      id: 1,
+      name: "Bob", 
+      age: 25,
+      gender: "Male"
+    }]
+}
+```
+
+---
 
 ```
 POST /actors  
 ```
 (requires authorization header of `post:actors`)
-- description: list of actors
-- params: 
-  - name: string
-  - age: number
-  - gender: string
+- description: create actor
+- required-permission: `post:actors`
+- request arguments: 
+  - name (required): string
+  - age (required): number
+  - gender (required): string
 
 - returns status of created actor
+```
+{
+    "success": True,
+    "actors": [{ 
+      id: 2,
+      name: "Bill", 
+      age: 35,
+      gender: "Male"
+    }]
+}
+```
+
+---
 
 ```
 PATCH /actors/<id>
 ```
 (requires authorization header of `patch:actors`)
 - description: updates actor
-- params: 
-  - name: string
-  - age: number
-  - gender: string
+- request arguments:
+  - name (optional): string
+  - age (optional): number
+  - gender (optional): string
 
 - returns status of updated actor
 
+```
+{
+    "success": True,
+    "actors": [{ 
+      id: 1,
+      name: "Bill", 
+      age: 25,
+      gender: "Male"
+    }]
+}
+```
+
+---
 
 ```
 DELETE /actors/</id>
 ```
-(requires authorization header of `delete:actors`)
 - description: deletes actor
+- required-permission: `delete:actors`
+- request arguments: None
 - return status of deleted actor
+```
+{
+    "success": True,
+    "delete": 2
+}
+```
+
+---
 
 
 

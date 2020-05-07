@@ -1,3 +1,4 @@
+import os
 import json
 from flask import request, _request_ctx_stack, abort
 from functools import wraps
@@ -5,9 +6,9 @@ from jose import jwt
 from urllib.request import urlopen
 
 
-AUTH0_DOMAIN = 'dev-98w9-5eh.auth0.com'
-ALGORITHMS = ['RS256']
-API_AUDIENCE = 'agency'
+AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
+ALGORITHMS = os.environ.get("ALGORITHMS")
+API_AUDIENCE = os.environ.get("API_AUDIENCE")
 
 # AuthError Exception
 '''
@@ -26,6 +27,7 @@ class AuthError(Exception):
 
 def get_token_auth_header():
     auth = request.headers.get('Authorization', None)
+
     if not auth:
         raise AuthError({
             'code': 'authorization_header_missing',
