@@ -23,6 +23,12 @@ def create_app(test_config=None):
                              'GET,PATCH,POST,DELETE,OPTIONS')
         return response
 
+    @app.route("/", methods=["GET"])
+    def health():
+        return jsonify({
+            "status": "healthy"
+        })
+
     # ---
     # movies
     # ---
